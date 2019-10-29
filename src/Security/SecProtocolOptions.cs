@@ -148,7 +148,7 @@ namespace Security {
 				throw new ArgumentNullException (nameof (keyUpdateQueue));
 
 			BlockLiteral block_handler = new BlockLiteral ();
-			block_handler.SetupBlockUnsafe (Trampolines.SDSecProtocolKeyUpdate.Handler, keyUpdate);
+			block_handler.SetupBlockUnsafe (Trampolines.S__Security_Callbacks__SecProtocolKeyUpdate.Handler, keyUpdate);
 
 			sec_protocol_options_set_key_update_block (Handle, ref block_handler, keyUpdateQueue.Handle);
 			block_handler.CleanupBlock ();

@@ -1661,6 +1661,7 @@ SHARED_SOURCES = \
 	../tools/common/StringUtils.cs \
 	MonoNativeFunctionWrapperAttribute.cs \
 	NativeTypes/NMath.cs \
+	ObjCRuntime/Trampolines.cs \
 	ObjCRuntime/AdoptsAttribute.cs \
 	ObjCRuntime/BackingField.cs \
 	ObjCRuntime/BaseWrapper.cs \

@@ -6,7 +6,6 @@
 // Authors:
 //   Miguel de Icaza (miguel@xamarin.com)
 //
-#if !XAMCORE_2_0
 using System;
 using System.Reflection;
 using System.Collections.Generic;
@@ -17,8 +16,9 @@ using ObjCRuntime;
 namespace ObjCRuntime {
 
 	public static partial class Trampolines {
-		static Dictionary<IntPtr,Delegate> cache;
 		
+#if !XAMCORE_2_0
+		static Dictionary<IntPtr,Delegate> cache;
 		public static Delegate Lookup (IntPtr methodPtr, Type type)
 		{
 			if (cache == null)
@@ -40,6 +40,46 @@ namespace ObjCRuntime {
 			}
 			return val;
 		}
+#endif
+
+		[UnmanagedFunctionPointerAttribute (CallingConvention.Cdecl)]
+		[UserDelegateType (typeof (global::System.Action))]
+		internal delegate void D_DispatchBlock_Action (IntPtr block);
+
+		static internal class SDAction_DispatchBlock_SetEventHandler {
+			static internal readonly D_DispatchBlock_Action Handler = Invoke;
+
+			[MonoPInvokeCallback (typeof (D_DispatchBlock_Action))]
+			static unsafe void Invoke (IntPtr block) {
+				var descriptor = (BlockLiteral *) block;
+				var del = (global::System.Action) (descriptor->Target);
+				if (del != null)
+					del ();
+			}
+		} /* class SDAction */
+
+		static internal class SDAction_DispatchBlock_SetRegistrationHandler {
+			static internal readonly D_DispatchBlock_Action Handler = Invoke;
+
+			[MonoPInvokeCallback (typeof (D_DispatchBlock_Action))]
+			static unsafe void Invoke (IntPtr block) {
+				var descriptor = (BlockLiteral *) block;
+				var del = (global::System.Action) (descriptor->Target);
+				if (del != null)
+					del ();
+			}
+		} /* class SDAction */
+
+		static internal class SDAction_DispatchBlock_SetCancelHandler {
+			static internal readonly D_DispatchBlock_Action Handler = Invoke;
+
+			[MonoPInvokeCallback (typeof (D_DispatchBlock_Action))]
+			static unsafe void Invoke (IntPtr block) {
+				var descriptor = (BlockLiteral *) block;
+				var del = (global::System.Action) (descriptor->Target);
+				if (del != null)
+					del ();
+			}
+		} /* class SDAction */
 	}
 }
-#endif

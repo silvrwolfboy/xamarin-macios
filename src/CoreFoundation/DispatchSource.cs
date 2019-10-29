@@ -102,7 +102,8 @@ namespace CoreFoundation {
 				return;
 			}
 
-			DispatchBlock.Invoke (
+			Console.WriteLine ("DispatchSource.SetEventHandler ({0})", handler);
+			DispatchBlock.Invoke_SetEventHandler (
 				delegate {
 					var sc = SynchronizationContext.Current;
 					if (sc == null)
@@ -131,7 +132,8 @@ namespace CoreFoundation {
 			if (handler == null)
 				throw new ArgumentNullException ("handler");
 
-			DispatchBlock.Invoke (
+			Console.WriteLine ("DispatchSource.SetRegistrationHandler ({0})", handler);
+			DispatchBlock.Invoke_SetRegistrationHandler (
 				delegate {
 					var sc = SynchronizationContext.Current;
 					if (sc == null)
@@ -150,7 +152,8 @@ namespace CoreFoundation {
 			if (handler == null)
 				throw new ArgumentNullException ("handler");
 
-			DispatchBlock.Invoke (
+			Console.WriteLine ("DispatchSource.SetCancelHandler ({0})", handler);
+			DispatchBlock.Invoke_SetCancelHandler (
 				delegate {
 					var sc = SynchronizationContext.Current;
 					if (sc == null)

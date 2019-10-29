@@ -201,7 +201,7 @@ namespace AVFoundation {
 	}
 #endif
 
-#if TVOS
+#if TVOS && false
 	// tvOS removed some types - we need to keep stubs of them for binary compatibility
 	[Obsolete ("Removed in tvOS 10.")]
 	[Deprecated (PlatformName.TvOS, 10, 0, PlatformArchitecture.None)]

@@ -194,17 +194,52 @@ namespace CoreFoundation {
 		// the unmanaged code to release the resources allocated on the managed side
 		//
 		[BindingImpl (BindingImplOptions.Optimizable)]
-		internal static unsafe void Invoke (Action codeToRun, Action<IntPtr> invoker)
+		internal static unsafe void Invoke_SetEventHandler (Action codeToRun, Action<IntPtr> invoker)
 		{
 			BlockLiteral *block_ptr;
 			BlockLiteral block;
 			block = new BlockLiteral ();
 			block_ptr = &block;
 
-			block.SetupBlockUnsafe (Trampolines.SDAction.Handler, codeToRun);
+			block.SetupBlockUnsafe (Trampolines.SDAction_DispatchBlock_SetEventHandler.Handler, codeToRun);
 			invoker ((IntPtr) block_ptr);
 			block_ptr->CleanupBlock ();
 		}
+
+		//
+		// You must invoke ->CleanupBlock after you have transferred ownership to
+		// the unmanaged code to release the resources allocated on the managed side
+		//
+		[BindingImpl (BindingImplOptions.Optimizable)]
+		internal static unsafe void Invoke_SetRegistrationHandler (Action codeToRun, Action<IntPtr> invoker)
+		{
+			BlockLiteral *block_ptr;
+			BlockLiteral block;
+			block = new BlockLiteral ();
+			block_ptr = &block;
+
+			block.SetupBlockUnsafe (Trampolines.SDAction_DispatchBlock_SetRegistrationHandler.Handler, codeToRun);
+			invoker ((IntPtr) block_ptr);
+			block_ptr->CleanupBlock ();
+		}
+
+		//
+		// You must invoke ->CleanupBlock after you have transferred ownership to
+		// the unmanaged code to release the resources allocated on the managed side
+		//
+		[BindingImpl (BindingImplOptions.Optimizable)]
+		internal static unsafe void Invoke_SetCancelHandler (Action codeToRun, Action<IntPtr> invoker)
+		{
+			BlockLiteral *block_ptr;
+			BlockLiteral block;
+			block = new BlockLiteral ();
+			block_ptr = &block;
+
+			block.SetupBlockUnsafe (Trampolines.SDAction_DispatchBlock_SetCancelHandler.Handler, codeToRun);
+			invoker ((IntPtr) block_ptr);
+			block_ptr->CleanupBlock ();
+		}
+
 	}
 
 	[Flags]

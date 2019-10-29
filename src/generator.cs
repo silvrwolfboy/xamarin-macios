@@ -320,16 +320,27 @@ public class Tuple<A,B> {
 // The Invoke contains the invocation steps necessary to invoke the method
 //
 public class TrampolineInfo {
-	public string UserDelegate, DelegateName, TrampolineName, Parameters, Convert, Invoke, ReturnType, DelegateReturnType, ReturnFormat, Clear, OutReturnType, PostConvert;
+	string base_name;
+	string unique_name;
+	string delegate_name;
+	string trampoline_name;
+	string static_name;
+	string native_invoker_name;
+	public string UserDelegate, Parameters, Convert, Invoke, ReturnType, DelegateReturnType, ReturnFormat, Clear, OutReturnType, PostConvert;
 	public string UserDelegateTypeAttribute;
 	public Type Type;
+	public MemberInfo ContainingMember;
 	
-	public TrampolineInfo (string userDelegate, string delegateName, string trampolineName, string pars, string convert, string invoke, string returnType, string delegateReturnType, string returnFormat, string clear, string postConvert, Type type)
+	public TrampolineInfo (string userDelegate, string baseName, string pars, string convert, string invoke, string returnType, string delegateReturnType, string returnFormat, string clear, string postConvert, Type type, MemberInfo containing_member)
 	{
 		UserDelegate = userDelegate;
-		DelegateName = delegateName;
+		base_name = baseName;
+		unique_name = "__" + containing_member.DeclaringType.FullName.Replace ('.', '_') + "__";
+		delegate_name = "D" + unique_name + base_name;
+		trampoline_name = "T" + unique_name + base_name;
+		static_name = "S" + unique_name + base_name;
+		native_invoker_name = "NI" + unique_name + base_name;
 		Parameters = pars;
-		TrampolineName = trampolineName;
 		Convert = convert;
 		Invoke = invoke;
 		ReturnType = returnType;
@@ -339,20 +350,33 @@ public class TrampolineInfo {
 		PostConvert = postConvert;
 		this.Type = type;
 
-		TrampolineName = "Invoke";
+		//TrampolineName = "Invoke";
+		ContainingMember = containing_member;
+	}
+
+	public string DelegateName {
+		get {
+			return delegate_name;
+		}
+	}
+
+	public string TrampolineName {
+		get {
+			return trampoline_name;
+		}
 	}
 
 	// Name for the static class generated that contains the Objective-C to C# block bridge
 	public string StaticName {
 		get {
-			return "S" + DelegateName;
+			return static_name;
 		}
 	}
 	
 	// Name for the class generated that allows C# to invoke an Objective-C block
 	public string NativeInvokerName {
 		get {
-			return "NI" + DelegateName;
+			return native_invoker_name;
 		}
 	}
 }
@@ -868,7 +892,7 @@ public partial class Generator : IMemberGatherer {
 	Dictionary<string,string> selector_names = new Dictionary<string,string> ();
 	Dictionary<string,string> send_methods = new Dictionary<string,string> ();
 	List<MarshalType> marshal_types = new List<MarshalType> ();
-	Dictionary<Type,TrampolineInfo> trampolines = new Dictionary<Type,TrampolineInfo> ();
+	Dictionary<Tuple<Type, MemberInfo>, TrampolineInfo> trampolines = new Dictionary<Tuple<Type, MemberInfo>, TrampolineInfo> ();
 	Dictionary<Type,int> trampolines_generic_versions = new Dictionary<Type,int> ();
 	Dictionary<Type,Type> notification_event_arg_types = new Dictionary<Type,Type> ();
 	Dictionary<string, string> libraries = new Dictionary<string, string> (); // <LibraryName, libraryPath>
@@ -1600,11 +1624,11 @@ public partial class Generator : IMemberGatherer {
 	// the native types into managed types instead of hardcoding the limited
 	// values we know about here
 	//
-	public TrampolineInfo MakeTrampoline (Type t)
+	public TrampolineInfo MakeTrampoline (Type t, MemberInfo containing_method)
 	{
-		if (trampolines.ContainsKey (t)){
-			return trampolines [t];
-		} 
+		var key = new Tuple<Type, MemberInfo> (t, containing_method);
+		if (trampolines.TryGetValue (key, out var tramp))
+			return tramp;
 
 		var mi = t.GetMethod ("Invoke");
 		var pars = new StringBuilder ();
@@ -1753,7 +1777,8 @@ public partial class Generator : IMemberGatherer {
 				}
 				if (AttributeManager.HasAttribute<BlockCallbackAttribute> (pi)) {
 					pars.AppendFormat ("IntPtr {0}", pi.Name.GetSafeParamName ());
-					invoke.AppendFormat ("NID{0}.Create ({1})", MakeTrampolineName (pi.ParameterType), pi.Name.GetSafeParamName ());
+					var tinfo = MakeTrampoline (pi.ParameterType, containing_method);
+					invoke.AppendFormat ("{0}.Create ({1})", tinfo.NativeInvokerName, pi.Name.GetSafeParamName ());
 					// The trampoline will eventually be generated in the final loop
 				} else {
 					if (!AttributeManager.HasAttribute<CCallbackAttribute> (pi)) {
@@ -1776,8 +1801,7 @@ public partial class Generator : IMemberGatherer {
 		var rts = IsNativeEnum (rt) ? "var" : rt.ToString ();
 		var trampoline_name = MakeTrampolineName (t);
 		var ti = new TrampolineInfo (userDelegate: FormatType (null, t),
-					     delegateName: "D" + trampoline_name,
-					     trampolineName: "T" + trampoline_name,
+					     baseName: trampoline_name,
 					     pars: pars.ToString (),
 		                             convert: convert.ToString (),
 					     invoke: invoke.ToString (),
@@ -1786,11 +1810,12 @@ public partial class Generator : IMemberGatherer {
 					     returnFormat: returnformat,
 					     clear: clear.ToString (),
 		                             postConvert: postConvert.ToString (),
-					     type: t);
+					     type: t,
+					     containing_member: containing_method);
 					     
 
 		ti.UserDelegateTypeAttribute = FormatType (null, t);
-		trampolines [t] = ti;
+		trampolines [key] = ti;
 			
 		return ti;
 	}
@@ -2590,16 +2615,21 @@ public partial class Generator : IMemberGatherer {
 		sw.Close ();
 	}
 
-	Dictionary<Type,bool> generated_trampolines = new Dictionary<Type,bool> ();
-	
+	HashSet<Tuple<Type, MemberInfo>> generated_trampolines = new HashSet<Tuple<Type, MemberInfo>> ();
+	HashSet<string> generated_bridges = new HashSet<string> ();
+
 	void GenerateTrampolinesForQueue (TrampolineInfo [] queue)
 	{
 		Array.Sort (queue, (a, b) => string.CompareOrdinal (a.Type.FullName, b.Type.FullName));
 		foreach (var ti in queue) {
-			if (generated_trampolines.ContainsKey (ti.Type))
+			if (generated_bridges.Contains (ti.StaticName))
 				continue;
-			generated_trampolines [ti.Type] = true;
-			
+			generated_bridges.Add (ti.StaticName);
+			//var key = new Tuple<Type, MemberInfo> (ti.Type, ti.ContainingMember);
+			//if (generated_trampolines.Contains (key))
+			//	continue;
+			//generated_trampolines.Add (key);
+
 			var mi = ti.Type.GetMethod ("Invoke");
 			var parameters = mi.GetParameters ();
 
@@ -3549,7 +3579,7 @@ public partial class Generator : IMemberGatherer {
 			// Format nicely the type, as succinctly as possible
 			Type parType = GetCorrectGenericType (pi.ParameterType);
 			if (parType.IsSubclassOf (TypeManager.System_Delegate)){
-				var ti = MakeTrampoline (parType);
+				var ti = MakeTrampoline (parType, mi);
 				sb.AppendFormat ("[BlockProxy (typeof ({0}.Trampolines.{1}))]", ns.CoreObjCRuntime, ti.NativeInvokerName);
 			}
 
@@ -4102,7 +4132,7 @@ public partial class Generator : IMemberGatherer {
 					}
 				}
 			} else if (mai.Type.IsSubclassOf (TypeManager.System_Delegate)){
-				string trampoline_name = MakeTrampoline (pi.ParameterType).StaticName;
+				string trampoline_name = MakeTrampoline (pi.ParameterType, mi).StaticName;
 				string extra = "";
 				bool null_allowed = AttributeManager.HasAttribute<NullAllowedAttribute> (pi);
 				
@@ -4330,16 +4360,16 @@ public partial class Generator : IMemberGatherer {
 			GenerateTypeLowering (mi, null_allowed_override, enum_modes [i], out args2[i], out convs2[i], out disposes2[i], out by_ref_processing2[i], out by_ref_init2[i], propInfo);
 		}
 
-		// sanity check
-		if (enum_modes.Length > 1) {
-			bool sane = true;
-			sane &= convs2 [0].ToString () == convs2 [1].ToString ();
-			sane &= disposes2 [0].ToString () == disposes2 [1].ToString ();
-			sane &= by_ref_processing2 [0].ToString () == by_ref_processing2 [1].ToString ();
-			sane &= by_ref_init2 [0].ToString () == by_ref_init2 [1].ToString ();
-			if (!sane)
-				throw new BindingException (1028, "Internal sanity check failed, please file a bug report (https://github.com/xamarin/xamarin-macios/issues/new) with a test case.");
-		}
+		//// sanity check
+		//if (enum_modes.Length > 1) {
+		//	bool sane = true;
+		//	sane &= convs2 [0].ToString () == convs2 [1].ToString ();
+		//	sane &= disposes2 [0].ToString () == disposes2 [1].ToString ();
+		//	sane &= by_ref_processing2 [0].ToString () == by_ref_processing2 [1].ToString ();
+		//	sane &= by_ref_init2 [0].ToString () == by_ref_init2 [1].ToString ();
+		//	if (!sane)
+		//		throw new BindingException (1028, "Internal sanity check failed, please file a bug report (https://github.com/xamarin/xamarin-macios/issues/new) with a test case.");
+		//}
 
 		var convs = convs2 [0];
 		var disposes = disposes2 [0];
@@ -4398,7 +4428,7 @@ public partial class Generator : IMemberGatherer {
 		if (use_temp_return) {
 			if (mi.ReturnType.IsSubclassOf (TypeManager.System_Delegate)) {
 				print ("IntPtr ret;");
-				trampoline_info = MakeTrampoline (mi.ReturnType);
+				trampoline_info = MakeTrampoline (mi.ReturnType, mi);
 			} else if (align != null) {
 				print ("{0} ret = default({0});", FormatType (mi.DeclaringType, mi.ReturnType));
 				print ("IntPtr ret_alloced = Marshal.AllocHGlobal (Marshal.SizeOf (typeof ({0})) + {1});", FormatType (mi.DeclaringType, mi.ReturnType), align.Align);
@@ -4950,7 +4980,7 @@ public partial class Generator : IMemberGatherer {
 				sel = ba.Selector;
 			}
 
-			PrintBlockProxy (pi.PropertyType);
+			PrintBlockProxy (pi.PropertyType, setter);
 			PrintAttributes (pi, platform:true);
 
 			if (not_implemented_attr == null && (!minfo.is_sealed || !minfo.is_wrapper))
@@ -5279,16 +5309,16 @@ public partial class Generator : IMemberGatherer {
 	void PrintDelegateProxy (MethodInfo mi)
 	{
 		if (mi.ReturnType.IsSubclassOf (TypeManager.System_Delegate)) {
-			var ti = MakeTrampoline (mi.ReturnType);
+			var ti = MakeTrampoline (mi.ReturnType, mi);
 			print ("[return: DelegateProxy (typeof ({0}.Trampolines.{1}))]", ns.CoreObjCRuntime, ti.StaticName);
 		}
 	}
 
-	void PrintBlockProxy (Type type)
+	void PrintBlockProxy (Type type, MethodInfo mi)
 	{
 		type = GetCorrectGenericType (type);
 		if (type.IsSubclassOf (TypeManager.System_Delegate)) {
-			var ti = MakeTrampoline (type);
+			var ti = MakeTrampoline (type, mi);
 			print ("[param: BlockProxy (typeof ({0}.Trampolines.{1}))]", ns.CoreObjCRuntime, ti.NativeInvokerName);
 		}
 	}
@@ -5651,7 +5681,7 @@ public partial class Generator : IMemberGatherer {
 				var retType = GetCorrectGenericType (mi.ReturnType);
 				sb.Append (", ReturnType = typeof (").Append (RenderType (retType)).Append (")");
 				if (retType.IsSubclassOf (TypeManager.System_Delegate)) {
-					var ti = MakeTrampoline (retType);
+					var ti = MakeTrampoline (retType, mi);
 					sb.Append ($", ReturnTypeDelegateProxy = typeof ({ns.CoreObjCRuntime}.Trampolines.{ti.StaticName})");
 				}
 			}
@@ -5682,7 +5712,7 @@ public partial class Generator : IMemberGatherer {
 				for (int i = 0; i < parameters.Length; i++) {
 					var parType = GetCorrectGenericType (parameters [i].ParameterType);
 					if (parType.IsSubclassOf (TypeManager.System_Delegate)) {
-						var ti = MakeTrampoline (parType);
+						var ti = MakeTrampoline (parType, mi);
 						blockProxies [i] = $"typeof ({ns.CoreObjCRuntime}.Trampolines.{ti.NativeInvokerName})";
 						anyblockProxy = true;
 					}
@@ -5727,7 +5757,7 @@ public partial class Generator : IMemberGatherer {
 			// Check for block/delegate proxies
 			var propType = GetCorrectGenericType (pi.PropertyType);
 			if (propType.IsSubclassOf (TypeManager.System_Delegate)) {
-				var ti = MakeTrampoline (propType);
+				var ti = MakeTrampoline (propType, pi.SetMethod ?? pi.GetMethod);
 				if (pi.SetMethod != null)
 					sb.Append ($", ParameterBlockProxy = new Type [] {{ typeof ({ns.CoreObjCRuntime}.Trampolines.{ti.NativeInvokerName}) }}");
 				if (pi.GetMethod != null)
@@ -5809,7 +5839,7 @@ public partial class Generator : IMemberGatherer {
 			}
 			if (pi.CanWrite) {
 				var setMethod = pi.GetSetMethod ();
-				PrintBlockProxy (pi.PropertyType);
+				PrintBlockProxy (pi.PropertyType, setMethod);
 				PrintAttributes (setMethod, notImplemented:true);
 				if (!AttributeManager.HasAttribute<NotImplementedAttribute> (setMethod))
 					PrintExport (minfo, GetSetterExportAttribute (pi));
@@ -7300,7 +7330,7 @@ public partial class Generator : IMemberGatherer {
 			// Copy delegates from the API files into the output if they were declared there
 			//
 			var rootAssembly = types [0].Assembly;
-			foreach (var deltype in trampolines.Keys.OrderBy (d => d.Name, StringComparer.Ordinal)) {
+			foreach (var deltype in trampolines.Keys.Select (k => k.Item1).OrderBy (d => d.Name, StringComparer.Ordinal)) {
 				if (deltype.Assembly != rootAssembly)
 					continue;
 
