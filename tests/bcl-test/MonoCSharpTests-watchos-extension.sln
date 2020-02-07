@@ -1,0 +1,35 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonoCSharpTests-watchos-extension", "MonoCSharpTests-watchos-extension.csproj", "{716209E4-C1D4-4DEE-9B03-CA768D5219B5}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|iPhoneSimulator = Debug|iPhoneSimulator
+		Release|iPhoneSimulator = Release|iPhoneSimulator
+		Debug|iPhone = Debug|iPhone
+		Debug64_32|iPhone = Debug64_32|iPhone
+		Debug32|iPhone = Debug32|iPhone
+		Release|iPhone = Release|iPhone
+		Release64_32|iPhone = Release64_32|iPhone
+		Release32|iPhone = Release32|iPhone
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{716209E4-C1D4-4DEE-9B03-CA768D5219B5}.Debug|iPhoneSimulator.ActiveCfg = Debug|iPhoneSimulator
+		{716209E4-C1D4-4DEE-9B03-CA768D5219B5}.Debug|iPhoneSimulator.Build.0 = Debug|iPhoneSimulator
+		{716209E4-C1D4-4DEE-9B03-CA768D5219B5}.Release|iPhoneSimulator.ActiveCfg = Release|iPhoneSimulator
+		{716209E4-C1D4-4DEE-9B03-CA768D5219B5}.Release|iPhoneSimulator.Build.0 = Release|iPhoneSimulator
+		{716209E4-C1D4-4DEE-9B03-CA768D5219B5}.Debug|iPhone.ActiveCfg = Debug|iPhone
+		{716209E4-C1D4-4DEE-9B03-CA768D5219B5}.Debug|iPhone.Build.0 = Debug|iPhone
+		{716209E4-C1D4-4DEE-9B03-CA768D5219B5}.Debug64_32|iPhone.ActiveCfg = Debug64_32|iPhone
+		{716209E4-C1D4-4DEE-9B03-CA768D5219B5}.Debug64_32|iPhone.Build.0 = Debug64_32|iPhone
+		{716209E4-C1D4-4DEE-9B03-CA768D5219B5}.Debug32|iPhone.ActiveCfg = Debug32|iPhone
+		{716209E4-C1D4-4DEE-9B03-CA768D5219B5}.Debug32|iPhone.Build.0 = Debug32|iPhone
+		{716209E4-C1D4-4DEE-9B03-CA768D5219B5}.Release|iPhone.ActiveCfg = Release|iPhone
+		{716209E4-C1D4-4DEE-9B03-CA768D5219B5}.Release|iPhone.Build.0 = Release|iPhone
+		{716209E4-C1D4-4DEE-9B03-CA768D5219B5}.Release64_32|iPhone.ActiveCfg = Release64_32|iPhone
+		{716209E4-C1D4-4DEE-9B03-CA768D5219B5}.Release64_32|iPhone.Build.0 = Release64_32|iPhone
+		{716209E4-C1D4-4DEE-9B03-CA768D5219B5}.Release32|iPhone.ActiveCfg = Release32|iPhone
+		{716209E4-C1D4-4DEE-9B03-CA768D5219B5}.Release32|iPhone.Build.0 = Release32|iPhone
+	EndGlobalSection
+EndGlobal

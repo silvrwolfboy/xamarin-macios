@@ -94,14 +94,12 @@ namespace BCLTests {
 			Xamarin.iOS.UnitTests.TestRunner.Jargon jargon = Xamarin.iOS.UnitTests.TestRunner.Jargon.NUnitV3;
 			switch (options.XmlVersion) {
 			default:
-				jargon = Xamarin.iOS.UnitTests.TestRunner.Jargon.NUnitV3;
-				break;
-			/*case XmlVersion.NUnitV2:
+			case XmlVersion.NUnitV2:
 				jargon = Xamarin.iOS.UnitTests.TestRunner.Jargon.NUnitV2;
 				break;
 			case XmlVersion.NUnitV3:
 				jargon = Xamarin.iOS.UnitTests.TestRunner.Jargon.NUnitV3;
-				break;*/
+				break;
 			}
 			if (options.EnableXml) {
 				
