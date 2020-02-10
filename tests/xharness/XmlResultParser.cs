@@ -48,7 +48,7 @@ namespace xharness {
 			return false;
 		}
 
-		static (string resultLine, bool failed) ParseNUnitV3 (StreamReader stream, StreamWriter writer)
+		static (string resultLine, bool failed) ParseNUnitV3Xml (StreamReader stream, StreamWriter writer)
 		{
 			long testcasecount, passed, failed, inconclusive, skipped;
 			bool failedTestRun = false; // result = "Failed"
@@ -62,14 +62,7 @@ namespace xharness {
 						long.TryParse (reader ["failed"], out failed);
 						long.TryParse (reader ["inconclusive"], out inconclusive);
 						long.TryParse (reader ["skipped"], out skipped);
-						switch (reader["result"]) {
-						case "Failed":
-							failedTestRun = true;
-							break;
-						default:
-							failedTestRun = false;
-							break;
-						}
+						failedTestRun = failed != 0;
 					}
 					if (reader.NodeType == XmlNodeType.Element && reader.Name == "test-suite" && (reader ["type"] == "TestFixture" || reader ["type"] == "ParameterizedFixture")) {
 						var testCaseName = reader ["fullname"];
@@ -121,6 +114,7 @@ namespace xharness {
 				}
 			}
 			var resultLine = $"Tests run: {testcasecount} Passed: {passed} Inconclusive: {inconclusive} Failed: {failed} Ignored: {skipped + inconclusive}";
+			writer.WriteLine (resultLine);
 			return (resultLine, failedTestRun);
 		}
 
@@ -151,6 +145,7 @@ namespace xharness {
 			}
 			var passed = total - errors - failed - notRun - inconclusive - ignored - skipped - invalid;
 			var resultLine = $"Tests run: {total} Passed: {passed} Inconclusive: {inconclusive} Failed: {failed + errors} Ignored: {ignored + skipped + invalid}";
+			writer.WriteLine (resultLine);
 			return (resultLine, total == 0 || errors != 0 || failed != 0);
 		}
 
@@ -330,7 +325,7 @@ namespace xharness {
 					parseData = ParseNUnitXml (reader, writer);
 					break;
 				case Jargon.NUnitV3:
-					parseData = ParseNUnitV3 (reader, writer);
+					parseData = ParseNUnitV3Xml (reader, writer);
 					break;
 				case Jargon.xUnit:
 					parseData = ParsexUnitXml (reader, writer);
