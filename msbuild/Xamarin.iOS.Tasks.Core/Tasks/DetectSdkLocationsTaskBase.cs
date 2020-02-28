@@ -152,6 +152,7 @@ namespace Xamarin.iOS.Tasks
 					}
 					return;
 				}
+				Console.WriteLine ();
 				Log.LogWarning (MSBStrings.E0028, requestedSdkVersion, sdkVersion);
 			}
 
