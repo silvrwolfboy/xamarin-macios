@@ -40,7 +40,7 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <CustomToolNamespace>Xamarin.MSBuild.Localization</CustomToolNamespace>
       <LastGenOutput>MSBStrings.Designer.cs</LastGenOutput>
-      <LogicalName>Xamarin.MSBuild.Localization</LogicalName>
+      <LogicalName>Xamarin.MSBuild.Localization.resources</LogicalName>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
