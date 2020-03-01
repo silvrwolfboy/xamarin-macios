@@ -16,4 +16,21 @@
     <ProjectReference Include="..\Xamarin.MacDev.Tasks.Core\Xamarin.MacDev.Tasks.Core.csproj" />
     <ProjectReference Include="..\Xamarin.MacDev.Tasks\Xamarin.MacDev.Tasks.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\localization\localization\MSBStrings.resx">
+      <Link>MSBStrings.resx</Link>
+      <XlfSourceFormat>Resx</XlfSourceFormat>
+      <XlfOutputItem>EmbeddedResource</XlfOutputItem>
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>MSBStrings.Designer.cs</LastGenOutput>
+      <CustomToolNamespace>Xamarin.Localization.MSBuild</CustomToolNamespace>
+      <LogicalName>Xamarin.Localization.MSBuild.resources</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\localization\localization\MSBStrings.Designer.cs">
+      <Link>MSBStrings.Designer.cs</Link>
+      <DependentUpon>MSBStrings.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
 </Project>

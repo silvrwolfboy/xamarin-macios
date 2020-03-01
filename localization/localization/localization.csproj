@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup>
+    <UpdateXlfOnBuild>true</UpdateXlfOnBuild>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="XliffTasks" Version="1.0.0-beta.20151.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Update="MSBStrings.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <XlfSourceFormat>Resx</XlfSourceFormat>
+      <XlfOutputItem>EmbeddedResource</XlfOutputItem>
+      <CustomToolNamespace>Xamarin.Localization.MSBuild</CustomToolNamespace>
+      <LogicalName>Xamarin.Localization.MSBuild.resources</LogicalName>
+      <LastGenOutput>MSBStrings.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="MSBStrings.Designer.cs">
+      <DependentUpon>MSBStrings.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+</Project>

@@ -26,10 +26,16 @@
     <Compile Include="..\..\tools\mtouch\errors.Designer.cs">
       <Link>errors.Designer.cs</Link>
     </Compile>
+    <Compile Include="..\..\localization\localization\MSBStrings.Designer.cs">
+      <Link>MSBStrings.Designer.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\tools\mtouch\errors.resx">
       <Link>errors.resx</Link>
+    </None>
+    <None Include="..\..\localization\localization\MSBStrings.resx">
+      <Link>MSBStrings.resx</Link>
     </None>
   </ItemGroup>
 </Project>

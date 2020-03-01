@@ -7,7 +7,7 @@ using Microsoft.Build.Utilities;
 
 using Xamarin.MacDev.Tasks;
 using Xamarin.MacDev;
-
+using Xamarin.Localization.MSBuild;
 namespace Xamarin.Mac.Tasks
 {
 	public class DetectSdkLocationsTaskBase : Task
@@ -107,6 +107,7 @@ namespace Xamarin.Mac.Tasks
 			Log.LogMessage(MessageImportance.Low, "GetPlatformPath: {0}", MacOSXSdks.Native.GetPlatformPath());
 
 			SdkDevPath = MacOSXSdks.Native.DeveloperRoot;
+			Console.WriteLine (MSBStrings.test);
 			if (string.IsNullOrEmpty(SdkDevPath)) {
 				Log.LogError("Could not find a valid Xcode developer path");
 				return false;

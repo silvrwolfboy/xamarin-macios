@@ -10,6 +10,7 @@ using Microsoft.Build.Utilities;
 
 using Xamarin.MacDev.Tasks;
 using Xamarin.MacDev;
+using Xamarin.Localization.MSBuild;
 
 namespace Xamarin.MacDev.Tasks
 {
@@ -254,6 +255,7 @@ namespace Xamarin.MacDev.Tasks
 				try {
 					plist = PDictionary.FromFile (AppManifest.ItemSpec);
 				} catch (Exception ex) {
+					Console.Write (MSBStrings.test);
 					Log.LogError (null, null, null, AppManifest.ItemSpec, 0, 0, 0, 0, "{0}", ex.Message);
 					return false;
 				}

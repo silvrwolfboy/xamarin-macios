@@ -7,6 +7,7 @@ using Microsoft.Build.Utilities;
 
 using Xamarin.MacDev.Tasks;
 using Xamarin.MacDev;
+using Xamarin.Localization.MSBuild;
 
 namespace Xamarin.iOS.Tasks
 {
@@ -131,7 +132,7 @@ namespace Xamarin.iOS.Tasks
 		{
 			var currentSdk = IPhoneSdks.GetSdk (Framework);
 			IPhoneSdkVersion requestedSdkVersion;
-
+			Console.WriteLine (MSBStrings.test);
 			if (string.IsNullOrEmpty (SdkVersion)) {
 				requestedSdkVersion = IPhoneSdkVersion.UseDefault;
 			} else if (!IPhoneSdkVersion.TryParse (SdkVersion, out requestedSdkVersion)) {

@@ -1,0 +1,17 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "localization", "localization\localization.csproj", "{DD554B57-6F7C-4B99-B54F-D1835E70EEBF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DD554B57-6F7C-4B99-B54F-D1835E70EEBF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DD554B57-6F7C-4B99-B54F-D1835E70EEBF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DD554B57-6F7C-4B99-B54F-D1835E70EEBF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DD554B57-6F7C-4B99-B54F-D1835E70EEBF}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
